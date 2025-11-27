@@ -17,8 +17,8 @@ class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
     private val _state = MutableStateFlow<UiState>(UiState.Loading)
     val state: StateFlow<UiState> = _state
 
-    private val _users = MutableLiveData<List<User>>(emptyList())
-    val users: LiveData<List<User>> = _users
+    private val _usersUi = MutableLiveData<List<User>>(emptyList())
+    val usersUi: LiveData<List<User>> = _usersUi
 
     init {
         getUsers()
@@ -27,6 +27,7 @@ class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
     fun getUsers(onComplete: (() -> Unit)? = null) {
         _state.value = UiState.Loading
         viewModelScope.launch {
+            //delay just to show loading state
             delay(2000)
             try {
                 val userList = useCase.execute()
@@ -35,7 +36,7 @@ class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
                         _state.value =  UiState.Error("No user found")
                 } else {
                         _state.value = UiState.Success(userList)
-                        _users.value = userList
+                        _usersUi.value = userList
                 }
             } catch (t: Throwable) {
                 _state.value = UiState.Error(t.message ?: "Try again")
@@ -48,9 +49,9 @@ class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
     fun sortByName(ascending: Boolean = true) {
 
         val sorted = if (ascending) {
-            users.value?.sortedBy { it.name?.lowercase() }
+            usersUi.value?.sortedBy { it.name?.lowercase() }
         } else {
-            users.value?.sortedByDescending { it.name?.lowercase() }
+            usersUi.value?.sortedByDescending { it.name?.lowercase() }
         }
         if (sorted != null) {
             _state.update { UiState.Success(sorted) }

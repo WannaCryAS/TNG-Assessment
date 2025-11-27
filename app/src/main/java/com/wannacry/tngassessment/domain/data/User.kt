@@ -9,7 +9,15 @@ data class User(
     val phone: String?,
     val website: String?,
     val company: Company?
-)
+) {
+    val companyName: String?
+        get() = company?.name
+    val fullAddress: String?
+        get() = "${address?.suite}, ${address?.street}, ${address?.city}, ${address?.zipcode}"
+
+    val location: String?
+        get() = "${address?.geo?.lat}, ${address?.geo?.lng}"
+}
 
 data class Company(
     val name: String?,
