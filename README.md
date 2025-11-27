@@ -6,11 +6,12 @@ MVVM + Clean Architechture
 Koin
 Coil (AsyncImage - compose)
 
+```bash
 .
 ├── MainActivity.kt
 ├── MyApp.kt
 ├── config
-│   └── Constants.kt
+│   ├── Constants.kt
 ├── di
 │   └── AppModule.kt
 ├── domain
@@ -35,5 +36,8 @@ Coil (AsyncImage - compose)
         ├── Color.kt
         ├── Theme.kt
         └── Type.kt
+
+```
+
         
 
