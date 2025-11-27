@@ -4,15 +4,15 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import com.wannacry.tngassessment.presentation.screen.UsersScreen
+import com.wannacry.tngassessment.presentation.viewmodel.UsersViewModel
 import com.wannacry.tngassessment.ui.theme.TNGAssessmentTheme
+import org.koin.androidx.compose.getViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,14 +20,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TNGAssessmentTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(innerPadding)
-                    )
-                }
+                val viewModel: UsersViewModel = getViewModel()
+                UsersScreen(viewModel, this@MainActivity)
             }
         }
     }
@@ -46,6 +40,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @Composable
 fun GreetingPreview() {
     TNGAssessmentTheme {
-        Greeting( name = "Android" )
+        val viewModel = getViewModel<UsersViewModel>()
+        val context = MainActivity()
+        UsersScreen(viewModel, context)
     }
 }
