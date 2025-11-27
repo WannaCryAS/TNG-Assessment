@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -16,10 +15,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -37,16 +36,14 @@ import com.wannacry.tngassessment.config.Constants.WEBSITE_BASE_URL
 import com.wannacry.tngassessment.domain.data.User
 
 @Composable
-fun UserItem(user: User, context: Context) {
-    val avatarName = remember(user) {
-        (user.username.takeIf { !it.isNullOrBlank() } ?: user.name)
-    }
-    val avatarUrl = remember(avatarName) {
-        "$AVATAR_URL$EXTEND_URL_NAME$avatarName&$EXTEND_URL_BACKGROUND$RANDOM"
-    }
+fun UserItem(user: User) {
+    val context = LocalContext.current
+    val avatarName = user.username.takeIf { !it.isNullOrBlank() } ?: user.name
+    val avatarUrl = "$AVATAR_URL$EXTEND_URL_NAME$avatarName&$EXTEND_URL_BACKGROUND$RANDOM"
+
     Card(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
     ) {
@@ -65,17 +62,15 @@ fun UserItem(user: User, context: Context) {
 
             Spacer(modifier = Modifier.width(12.dp))
             Column {
-                user.let {
-                    Text(
-                        text = it.name ?: "Unknown",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 24.sp
-                    )
-                    Text(
-                        text = "@${it.username ?: "Unknown"}",
-                        fontStyle = FontStyle.Italic
-                    )
-                }
+                Text(
+                    text = user.name ?: "Unknown",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 24.sp
+                )
+                Text(
+                    text = "@${user.username ?: "Unknown"}",
+                    fontStyle = FontStyle.Italic
+                )
             }
         }
         Text(
@@ -112,10 +107,8 @@ fun UserItem(user: User, context: Context) {
                         vertical = 8.dp
                     )
             ) {
-                user.let { it ->
-                    Text(text = ": ${it.email ?: "-"}")
-                    Text(text = ": ${it.phone ?: "-"}")
-                }
+                Text(text = ": ${user.email ?: "-"}")
+                Text(text = ": ${user.phone ?: "-"}")
             }
         }
         Text(
@@ -156,40 +149,36 @@ fun UserItem(user: User, context: Context) {
                         vertical = 8.dp
                     )
             ) {
-                user.let { it ->
-                    Text(text = ": ${it.companyName ?: "-"}")
+                    Text(text = ": ${user.companyName ?: "-"}")
                     Text(
-                        text = ": ${it.website ?: "-"}",
+                        text = ": ${user.website ?: "-"}",
                         color = Color.Blue,
                         modifier = Modifier.clickable {
-                            val intent =
-                                Intent(Intent.ACTION_VIEW, "$WEBSITE_BASE_URL${it.website}".toUri())
-                            context.startActivity(intent)
+                            goToWebsite(user.website, context)
                         }
                     )
                     Text(
-                        text = ": ${it.location ?: "-"}",
+                        text = ": ${user.location ?: "-"}",
                         color = Color.Blue,
                         modifier = Modifier.clickable {
                             openGoogleMap(
-                                lat = it.address?.geo?.lat,
-                                lang = it.address?.geo?.lng,
+                                lat = user.address?.geo?.lat,
+                                lang = user.address?.geo?.lng,
                                 context = context
                             )
                         }
                     )
-                    Text(text = ": ${it.fullAddress ?: "-"}")
+                    Text(text = ": ${user.fullAddress ?: "-"}")
                 }
             }
         }
     }
-}
 
 fun openGoogleMap(lat: String?, lang: String?, context: Context) {
-    val gmmIntentUri =
+    val intentUri =
         "geo:$lat,$lang?q=$lat,$lang".toUri()
 
-    val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+    val mapIntent = Intent(Intent.ACTION_VIEW, intentUri)
     mapIntent.setPackage(GOOGLE_MAP_PACKAGE)
 
     try {
@@ -201,4 +190,10 @@ fun openGoogleMap(lat: String?, lang: String?, context: Context) {
         )
         context.startActivity(fallbackIntent)
     }
+}
+
+fun goToWebsite(website: String?, context: Context) {
+    val intent =
+        Intent(Intent.ACTION_VIEW, "$WEBSITE_BASE_URL${website}".toUri())
+    context.startActivity(intent)
 }

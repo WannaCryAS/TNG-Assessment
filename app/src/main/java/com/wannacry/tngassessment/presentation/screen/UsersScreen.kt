@@ -135,8 +135,8 @@ fun UsersScreen(viewModel: UsersViewModel, context: Context) {
                         }
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            items(users) { user ->
-                                UserItem(user, context = context)
+                            items(users, key = { it.id }) { user ->
+                                UserItem(user)
                             }
                         }
                     }

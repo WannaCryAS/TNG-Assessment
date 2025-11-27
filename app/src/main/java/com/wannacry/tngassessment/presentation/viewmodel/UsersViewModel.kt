@@ -32,11 +32,11 @@ class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
             try {
                 val userList = useCase.execute()
 
-                    if (userList.isEmpty()) {
-                        _state.value =  UiState.Error("No user found")
+                if (userList.isEmpty()) {
+                    _state.value = UiState.Error("No user found")
                 } else {
-                        _state.value = UiState.Success(userList)
-                        _usersUi.value = userList
+                    _state.value = UiState.Success(userList)
+                    _usersUi.value = userList
                 }
             } catch (t: Throwable) {
                 _state.value = UiState.Error(t.message ?: "Try again")
