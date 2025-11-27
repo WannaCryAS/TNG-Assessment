@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -47,6 +49,11 @@ import com.wannacry.tngassessment.presentation.viewmodel.UsersViewModel
 fun UsersScreen(viewModel: UsersViewModel, context: Context) {
     val state by viewModel.state.collectAsState()
     var isPullRefreshing by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(state) {
+        listState.scrollToItem(0)
+    }
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = isPullRefreshing,
@@ -134,7 +141,7 @@ fun UsersScreen(viewModel: UsersViewModel, context: Context) {
                             Text("No users found", textAlign = TextAlign.Center)
                         }
                     } else {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                             items(users, key = { it.id }) { user ->
                                 UserItem(user)
                             }
