@@ -19,7 +19,6 @@ val appModule = module {
             .build()
             .create(UserServiceApi::class.java)
     }
-//    single { Service(get()) }
     single<UserRepository> { UserRepositoryImpl(get()) }
     single { GetUserUseCase(get()) }
     viewModel { UsersViewModel(get()) }
