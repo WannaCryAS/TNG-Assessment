@@ -1,4 +1,4 @@
-package com.wannacry.tngassessment
+package com.wannacry.tngassessment.viewmodel
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.wannacry.tngassessment.domain.data.Address
@@ -217,7 +217,6 @@ class UsersViewModelTest {
         coEvery { useCase.execute() } returns users
 
         viewModel.getUsers()
-        advanceTimeBy(2000)
         advanceUntilIdle()
 
         viewModel.sortByName(true)
