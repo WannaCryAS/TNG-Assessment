@@ -1,6 +1,5 @@
 package com.wannacry.tngassessment.presentation.screen
 
-import android.content.Context
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -46,7 +45,7 @@ import com.wannacry.tngassessment.presentation.viewmodel.UsersViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun UsersScreen(viewModel: UsersViewModel, context: Context) {
+fun UsersScreen(viewModel: UsersViewModel) {
     val state by viewModel.state.collectAsState()
     var isPullRefreshing by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
@@ -59,7 +58,10 @@ fun UsersScreen(viewModel: UsersViewModel, context: Context) {
         refreshing = isPullRefreshing,
         onRefresh = {
             isPullRefreshing = true
-            viewModel.getUsers(onComplete = { isPullRefreshing = false })
+            viewModel.getUsers(
+                onComplete = { isPullRefreshing = false },
+                isRefreshing = true
+            )
         }
     )
 

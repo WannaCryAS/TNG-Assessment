@@ -24,14 +24,15 @@ class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
         getUsers()
     }
 
-    fun getUsers(onComplete: (() -> Unit)? = null) {
-        _state.value = UiState.Loading
+    fun getUsers(onComplete: (() -> Unit)? = null, isRefreshing: Boolean = false) {
+        if (!isRefreshing) {
+            _state.value = UiState.Loading
+        }
         viewModelScope.launch {
             //delay just to show loading state
             delay(2000)
             try {
                 val userList = useCase.execute()
-
                 if (userList.isEmpty()) {
                     _state.value = UiState.Error("No user found")
                 } else {

@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TNGAssessmentTheme {
                 val viewModel: UsersViewModel = getViewModel()
-                UsersScreen(viewModel, this@MainActivity)
+                UsersScreen(viewModel)
             }
         }
     }
@@ -30,6 +30,6 @@ fun GreetingPreview() {
     TNGAssessmentTheme {
         val viewModel = getViewModel<UsersViewModel>()
         val context = MainActivity()
-        UsersScreen(viewModel, context)
+        UsersScreen(viewModel)
     }
 }
