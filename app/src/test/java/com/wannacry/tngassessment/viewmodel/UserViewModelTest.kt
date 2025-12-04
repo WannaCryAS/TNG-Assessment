@@ -14,6 +14,9 @@ import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -43,60 +46,62 @@ class UsersViewModelTest {
 
     @Test
     fun `getUsers success should update state and usersUi`() = runTest {
-        val mockUsers = listOf(
-            User(
-                id = 1,
-                name = "Alice",
-                username = "alice",
-                email = "a@a.com",
-                address = Address(
-                    street = "street 1",
-                    suite = "suite 1",
-                    city = "city 1",
-                    zipcode = "zipcode 1",
-                    geo = Geo(
-                        lat = "-1.23456",
-                        lng = "5.432112"
+        val mockUsers: Flow<List<User>> = flowOf(
+            listOf(
+                User(
+                    id = 1,
+                    name = "Alice",
+                    username = "alice",
+                    email = "a@a.com",
+                    address = Address(
+                        street = "street 1",
+                        suite = "suite 1",
+                        city = "city 1",
+                        zipcode = "zipcode 1",
+                        geo = Geo(
+                            lat = "-1.23456",
+                            lng = "5.432112"
+                        ),
                     ),
-                ),
 
-                phone = "0987654321",
-                website = "a.net",
-                company = Company(
-                    name = "company 1",
-                    catchPhrase = "abcd efg",
-                    bs = "bs bs"
+                    phone = "0987654321",
+                    website = "a.net",
+                    company = Company(
+                        name = "company 1",
+                        catchPhrase = "abcd efg",
+                        bs = "bs bs"
+                    )
+                ),
+                User(
+                    id = 2,
+                    name = "Ali",
+                    username = "ali",
+                    email = "b@b.com",
+                    address = Address(
+                        street = "street 2",
+                        suite = "suite 2",
+                        city = "city 2",
+                        zipcode = "zipcode 2",
+                        geo = Geo(
+                            lat = "-1.23098",
+                            lng = "5.123112"
+                        ),
+                    ),
+
+                    phone = "1234567890",
+                    website = "b.net",
+                    company = Company(
+                        name = "company 2",
+                        catchPhrase = "hrjk lmno",
+                        bs = "sb sb"
+                    ),
                 )
-            ),
-            User(
-                id = 2,
-                name = "Ali",
-                username = "ali",
-                email = "b@b.com",
-                address = Address(
-                    street = "street 2",
-                    suite = "suite 2",
-                    city = "city 2",
-                    zipcode = "zipcode 2",
-                    geo = Geo(
-                        lat = "-1.23098",
-                        lng = "5.123112"
-                    ),
-                ),
-
-                phone = "1234567890",
-                website = "b.net",
-                company = Company(
-                    name = "company 2",
-                    catchPhrase = "hrjk lmno",
-                    bs = "sb sb"
-                ),
             )
         )
         coEvery { useCase.execute() } returns mockUsers
 
         viewModel.getUsers()
-        advanceTimeBy(2000) // skip delay
+        advanceTimeBy(2000)
         advanceUntilIdle()
 
         assertTrue(viewModel.state.value is UiState.Success)
@@ -105,7 +110,7 @@ class UsersViewModelTest {
 
     @Test
     fun `getUsers empty list should return Error`() = runTest {
-        coEvery { useCase.execute() } returns emptyList()
+        coEvery { useCase.execute() } returns flow { emit(emptyList()) }
 
         viewModel.getUsers()
         advanceTimeBy(2000)
@@ -118,7 +123,7 @@ class UsersViewModelTest {
 
     @Test
     fun `getUsers throws exception should return Error`() = runTest {
-        coEvery { useCase.execute() } throws RuntimeException("Network error")
+        coEvery { useCase.execute() } returns flow { throw RuntimeException("Network error") }
 
         viewModel.getUsers()
         advanceTimeBy(2000)
@@ -140,7 +145,8 @@ class UsersViewModelTest {
         var desc = (viewModel.state.value as UiState.Success).users
         assertEquals(users, desc.map { it.name })
 
-        users = listOf(
+        users =
+            listOf(
             User(
                 id = 1,
                 name = "Charlie",
@@ -214,7 +220,7 @@ class UsersViewModelTest {
                 ),
             ),
         )
-        coEvery { useCase.execute() } returns users
+        coEvery { useCase.execute() } returns flowOf(users)
 
         viewModel.getUsers()
         advanceUntilIdle()

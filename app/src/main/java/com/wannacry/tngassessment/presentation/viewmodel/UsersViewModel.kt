@@ -1,7 +1,5 @@
 package com.wannacry.tngassessment.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.wannacry.tngassessment.domain.data.User
@@ -10,52 +8,55 @@ import com.wannacry.tngassessment.presentation.UiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class UsersViewModel(private val useCase: GetUserUseCase) : ViewModel() {
+
     private val _state = MutableStateFlow<UiState>(UiState.Loading)
     val state: StateFlow<UiState> = _state
 
-    private val _usersUi = MutableLiveData<List<User>>(emptyList())
-    val usersUi: LiveData<List<User>> = _usersUi
+    private val _usersUi = MutableStateFlow<List<User>>(emptyList())
+    val usersUi: StateFlow<List<User>> = _usersUi
 
     init {
         getUsers()
     }
 
     fun getUsers(onComplete: (() -> Unit)? = null, isRefreshing: Boolean = false) {
+
         if (!isRefreshing) {
             _state.value = UiState.Loading
         }
+
         viewModelScope.launch {
             //delay just to show loading state
             delay(2000)
-            try {
-                val userList = useCase.execute()
-                if (userList.isEmpty()) {
-                    _state.value = UiState.Error("No user found")
-                } else {
-                    _state.value = UiState.Success(userList)
-                    _usersUi.value = userList
+
+            useCase.execute()
+                .catch { error ->
+                    _state.value = UiState.Error(error.message ?: "Try again")
                 }
-            } catch (t: Throwable) {
-                _state.value = UiState.Error(t.message ?: "Try again")
-            } finally {
-                onComplete?.invoke()
-            }
+                .collect { list ->
+                    if (list.isEmpty()) {
+                        _state.value = UiState.Error("No user found")
+                    } else {
+                        _usersUi.value = list
+                        _state.value = UiState.Success(list)
+                    }
+                }
+
+            onComplete?.invoke()
         }
     }
 
     fun sortByName(ascending: Boolean = true) {
-
         val sorted = if (ascending) {
-            usersUi.value?.sortedBy { it.name?.lowercase() }
+            _usersUi.value.sortedBy { it.name?.lowercase() }
         } else {
-            usersUi.value?.sortedByDescending { it.name?.lowercase() }
+            _usersUi.value.sortedByDescending { it.name?.lowercase() }
         }
-        if (sorted != null) {
-            _state.update { UiState.Success(sorted) }
-        }
+        _usersUi.value = sorted
+        _state.value = UiState.Success(sorted)
     }
 }

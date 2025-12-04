@@ -8,6 +8,8 @@ import com.wannacry.tngassessment.domain.repo.UserRepository
 import com.wannacry.tngassessment.domain.usecase.GetUserUseCase
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -45,7 +47,6 @@ class GetUserUseCaseTest {
                         lng = "5.432112"
                     ),
                 ),
-
                 phone = "0987654321",
                 website = "a.net",
                 company = Company(
@@ -69,7 +70,6 @@ class GetUserUseCaseTest {
                         lng = "5.123112"
                     ),
                 ),
-
                 phone = "1234567890",
                 website = "b.net",
                 company = Company(
@@ -80,22 +80,22 @@ class GetUserUseCaseTest {
             )
         )
 
-        `when`(repo.getUsers()).thenReturn(users)
+        `when`(repo.getUsers()).thenReturn(flow { emit(users) })
 
-        val result = useCase.execute()
+        val result = useCase.execute().toList() // collect emissions
 
-        assertEquals(2, result.size)
-        assertEquals("Alice", result[0].name)
+        assertEquals(2, result[0].size)
+        assertEquals("Alice", result[0][0].name)
         verify(repo, times(1)).getUsers()
     }
 
     @Test
     fun `execute should return empty list`() = runTest {
-        `when`(repo.getUsers()).thenReturn(emptyList())
+        `when`(repo.getUsers()).thenReturn(flow { emit(emptyList()) })
 
-        val result = useCase.execute()
+        val result = useCase.execute().toList()
 
-        assertTrue(result.isEmpty())
+        assertTrue(result[0].isEmpty())
         verify(repo, times(1)).getUsers()
     }
 }
