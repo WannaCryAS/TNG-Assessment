@@ -35,10 +35,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.wannacry.tngassessment.config.Constants.AVATAR_URL
+import com.wannacry.tngassessment.config.Constants.EXTEND_URL_BACKGROUND
+import com.wannacry.tngassessment.config.Constants.EXTEND_URL_NAME
+import com.wannacry.tngassessment.config.Constants.RANDOM
 import com.wannacry.tngassessment.presentation.UiState
 import com.wannacry.tngassessment.presentation.screen.component.UserItem
 import com.wannacry.tngassessment.presentation.viewmodel.UsersViewModel
@@ -49,6 +54,7 @@ fun UsersScreen(viewModel: UsersViewModel) {
     val state by viewModel.state.collectAsState()
     var isPullRefreshing by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val context = LocalContext.current
 
     LaunchedEffect(state) {
         listState.scrollToItem(0)
@@ -145,7 +151,14 @@ fun UsersScreen(viewModel: UsersViewModel) {
                     } else {
                         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                             items(users, key = { it.id }) { user ->
-                                UserItem(user)
+                                val avatarName = user.username.takeIf { !it.isNullOrBlank() } ?: user.name
+                                val avatarUrl = "$AVATAR_URL$EXTEND_URL_NAME$avatarName&$EXTEND_URL_BACKGROUND$RANDOM"
+
+                                UserItem(
+                                    data = user,
+                                    context = context,
+                                    avatarUrl = avatarUrl,
+                                )
                             }
                         }
                     }

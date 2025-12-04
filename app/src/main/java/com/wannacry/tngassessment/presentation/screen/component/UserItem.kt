@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -18,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,20 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import coil.compose.AsyncImage
-import com.wannacry.tngassessment.config.Constants.AVATAR_URL
-import com.wannacry.tngassessment.config.Constants.EXTEND_URL_BACKGROUND
-import com.wannacry.tngassessment.config.Constants.EXTEND_URL_NAME
 import com.wannacry.tngassessment.config.Constants.GOOGLE_MAP_PACKAGE
 import com.wannacry.tngassessment.config.Constants.GOOGLE_MAP_URL
-import com.wannacry.tngassessment.config.Constants.RANDOM
 import com.wannacry.tngassessment.config.Constants.WEBSITE_BASE_URL
 import com.wannacry.tngassessment.domain.data.User
 
 @Composable
-fun UserItem(user: User) {
-    val context = LocalContext.current
-    val avatarName = user.username.takeIf { !it.isNullOrBlank() } ?: user.name
-    val avatarUrl = "$AVATAR_URL$EXTEND_URL_NAME$avatarName&$EXTEND_URL_BACKGROUND$RANDOM"
+fun UserItem(data: User, context: Context, avatarUrl: String?) {
 
     Card(
         modifier = Modifier
@@ -47,153 +40,128 @@ fun UserItem(user: User) {
             .padding(horizontal = 12.dp, vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            AsyncImage(
-                model = avatarUrl,
-                contentDescription = "user avatar",
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(RoundedCornerShape(16.dp))
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = user.name ?: "Unknown",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 24.sp
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth()) {
+                AsyncImage(
+                    model = avatarUrl,
+                    contentDescription = "user avatar",
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
                 )
-                Text(
-                    text = "@${user.username ?: "Unknown"}",
-                    fontStyle = FontStyle.Italic
-                )
-            }
-        }
-        Text(
-            "User Information",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier
-                .padding(
-                    horizontal = 16.dp,
-                    vertical = 4.dp
-                )
-                .fillMaxWidth()
-        )
-        Row(modifier = Modifier.padding(horizontal = 4.dp)) {
-            Column(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(
-                        start = 16.dp,
-                        end = 4.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    )
-            ) {
-                Text(text = "Email")
-                Text(text = "Phone No")
-            }
-            Column(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(
-                        horizontal = 4.dp,
-                        vertical = 8.dp
-                    )
-            ) {
-                Text(text = ": ${user.email ?: "-"}")
-                Text(text = ": ${user.phone ?: "-"}")
-            }
-        }
-        Text(
-            "Company Information",
-            textAlign = TextAlign.Center,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp,
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 4.dp)
-                .fillMaxWidth()
-        )
-        Row(
-            modifier = Modifier.padding(
-                horizontal = 4.dp,
-                vertical = 4.dp
-            )
-        ) {
-            Column(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(
-                        start = 16.dp,
-                        end = 4.dp,
-                        top = 8.dp,
-                        bottom = 8.dp
-                    )
-            ) {
-                Text(text = "Company")
-                Text(text = "Website")
-                Text(text = "Location")
-                Text(text = "Address")
-            }
-            Column(
-                modifier = Modifier
-                    .wrapContentWidth()
-                    .padding(
-                        horizontal = 4.dp,
-                        vertical = 8.dp
-                    )
-            ) {
-                    Text(text = ": ${user.companyName ?: "-"}")
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
                     Text(
-                        text = ": ${user.website ?: "-"}",
-                        color = Color.Blue,
-                        modifier = Modifier.clickable {
-                            goToWebsite(user.website, context)
-                        }
+                        text = data.name ?: "Unknown",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp
                     )
                     Text(
-                        text = ": ${user.location ?: "-"}",
-                        color = Color.Blue,
-                        modifier = Modifier.clickable {
-                            openGoogleMap(
-                                lat = user.address?.geo?.lat,
-                                lang = user.address?.geo?.lng,
-                                context = context
-                            )
-                        }
+                        text = "@${data.username ?: "Unknown"}",
+                        fontStyle = FontStyle.Italic
                     )
-                    Text(text = ": ${user.fullAddress ?: "-"}")
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                "User Information",
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FieldRow(label = "Email", value = data.email ?: "-")
+            FieldRow(label = "Phone No", value = data.phone ?: "-")
+            FieldRow(
+                label = "Website",
+                value = data.website ?: "-",
+                color = Color.Blue,
+                onClick = { goToWebsite(data.website, context) }
+            )
+            FieldRow(
+                label = "Location",
+                value = data.location ?: "-",
+                color = Color.Blue,
+                onClick = {
+                    openGoogleMap(
+                        lat = data.address?.geo?.lat,
+                        lang = data.address?.geo?.lng,
+                        context = context
+                    )
+                }
+            )
+            FieldRow(label = "Address", value = data.fullAddress ?: "-")
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                "Company Information",
+                textAlign = TextAlign.Center,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            FieldRow(label = "Name", value = data.companyName ?: "-")
+            FieldRow(label = "Business", value = data.company?.bs ?: "-")
+            FieldRow(label = "Tagline", value = data.company?.catchPhrase ?: "-")
         }
     }
+}
+
+@Composable
+fun FieldRow(
+    label: String,
+    value: String,
+    color: Color = Color.Unspecified,
+    onClick: (() -> Unit)? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp)
+    ) {
+        Text(
+            text = label,
+            modifier = Modifier.width(120.dp),
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = ": ",
+            modifier = Modifier.wrapContentWidth(),
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = value,
+            color = color,
+            modifier = Modifier
+                .weight(1f)
+                .clickable(enabled = onClick != null) {
+                    onClick?.invoke()
+                }
+        )
+    }
+}
 
 fun openGoogleMap(lat: String?, lang: String?, context: Context) {
-    val intentUri =
-        "geo:$lat,$lang?q=$lat,$lang".toUri()
-
-    val mapIntent = Intent(Intent.ACTION_VIEW, intentUri)
-    mapIntent.setPackage(GOOGLE_MAP_PACKAGE)
-
+    val intentUri = "geo:$lat,$lang?q=$lat,$lang".toUri()
+    val mapIntent = Intent(Intent.ACTION_VIEW, intentUri).apply {
+        setPackage(GOOGLE_MAP_PACKAGE)
+    }
     try {
         context.startActivity(mapIntent)
     } catch (e: Exception) {
-        val fallbackIntent = Intent(
+        context.startActivity(Intent(
             Intent.ACTION_VIEW,
             "$GOOGLE_MAP_URL$lat,$lang".toUri()
-        )
-        context.startActivity(fallbackIntent)
+        ))
     }
 }
 
 fun goToWebsite(website: String?, context: Context) {
-    val intent =
-        Intent(Intent.ACTION_VIEW, "$WEBSITE_BASE_URL${website}".toUri())
+    val intent = Intent(Intent.ACTION_VIEW, "$WEBSITE_BASE_URL${website}".toUri())
     context.startActivity(intent)
 }
